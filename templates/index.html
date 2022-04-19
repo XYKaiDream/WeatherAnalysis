@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/register.css"/>
+</head>
+<body>
+    <div id="login">
+        <h1>Login</h1>
+        {% if message %} {{message}} {% endif %}
+        <form method="post">
+            <input type="text" required="required" placeholder="用户名" name="username"/>
+            <input type="password" required="required" placeholder="密码" name="password"/>
+            <button class="but" type="submit">登录</button>
+            <br>
+            <a class = "but" href="{{ url_for('register') }}   " style="width: 270px;text-align: center">注册</a>
+            <br>
+            <a class = "but" href="{{ url_for('acceptpasswd') }}" style="width: 270px;text-align: center">忘记密码</a>
+        </form>
+    </div>
+</body>
+</html>

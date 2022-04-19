@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+{% block right %}
+    <script src="../static/js/jquery.min.js" type="text/javascript" charset='utf-8'></script>
+    <script src="https://cdn.bootcss.com/echarts/4.4.0-rc.1/echarts.js" charset='utf-8'></script>
+
+    <script type="text/javascript">
+        function draw_echarts(month) {
+            $.get('http://127.0.0.1:5000/month_weather_in_year_analysis/' + month, {},
+                function (data) {
+                    var dom = document.getElementById("main1");
+                    var myChart = echarts.init(dom);
+
+                    var high_temp = [];
+                    var low_temp = [];
+                    for (var i=0; i < data['月平均最高气温'].length; i++) {
+                        high_temp.push(data['月平均最高气温'][i].toFixed(2));
+                        low_temp.push(data['月平均最低气温'][i].toFixed(2));
+                    }
+
+                    var option = {
+                        title: {
+                            left: 'center',
+                            text: month + '月份平均最高气温与平均最低气温从 2011-2019 年的变化情况',
+                        },
+                        tooltip: {
+                            trigger: 'axis'
+                        },
+                        legend: {
+                            data: ['最高气温', '最低气温']
+                        },
+                        toolbox: {
+                            show: true,
+                            feature: {
+                                dataZoom: {
+                                    yAxisIndex: 'none'
+                                },
+                                dataView: {readOnly: false},
+                                magicType: {type: ['line', 'bar']},
+                                restore: {},
+                                saveAsImage: {}
+                            }
+                        },
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: data['年份']
+                        },
+                        yAxis: {
+                            type: 'value',
+                            axisLabel: {
+                                formatter: '{value} °C'
+                            }
+                        },
+                        series: [
+                            {
+                                name: '月平均最高气温',
+                                type: 'line',
+                                data: high_temp,
+                                markPoint: {
+                                    data: [
+                                        {type: 'max', name: '最大值'},
+                                        {type: 'min', name: '最小值'}
+                                    ]
+                                },
+                                markLine: {
+                                    data: [
+                                        {type: 'average', name: '平均值'}
+                                    ]
+                                }
+                            },
+                            {
+                                name: '月平均最低气温',
+                                type: 'line',
+                                data: low_temp,
+                                markPoint: {
+                                    data: [
+                                        {name: '周最低', value: -2, xAxis: 1, yAxis: -1.5}
+                                    ]
+                                },
+                                markLine: {
+                                    data: [
+                                        {type: 'average', name: '平均值'},
+                                        [{
+                                            symbol: 'none',
+                                            x: '90%',
+                                            yAxis: 'max'
+                                        }, {
+                                            symbol: 'circle',
+                                            label: {
+                                                position: 'start',
+                                                formatter: '最大值'
+                                            },
+                                            type: 'max',
+                                            name: '最高点'
+                                        }]
+                                    ]
+                                }
+                            }
+                        ]
+                    };
+
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+
+                }
+            );
+
+        }
+
+        // 初始化界面
+        $(function () {
+            $('#li_1').attr('class', '');
+            $('#li_2').attr('class', '');
+            $('#li_3').attr('class', '');
+            $('#li_4').attr('class', 'active');
+
+            $.ajaxSetup({async: false});
+
+            function change_callback() {
+                var month = $("#month").val();
+                draw_echarts(month);
+            }
+
+            $('#month').on('change', change_callback);
+
+            // 获取第一个有效时间的产量等数据
+            const month = $('#month option:first-child').val();
+            draw_echarts(month);
+        });
+    </script>
+
+    <!--右边展示-->
+    <div class="col-sm-10 col-sm-offset-2 main">
+        <h3 class="page-header">某一月在不同年份的天气变化情况（纵向比较）</h3>
+        <div class="row">
+            <div class="col-sm-10" style="margin-bottom: 20px; font-size: 18px;">
+                <span>选择月份：</span>
+                <select class="combobox" id="month"
+                        style="margin-left: 10px; margin-right: 20px; font-size: 18px; height: 28px;">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                </select>
+            </div>
+        </div>
+        <div class="row placeholders">
+            <div class="col-xs-12 placeholder" style="height:600px;" id="main1">
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

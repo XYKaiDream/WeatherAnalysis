@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>acceptpasswd</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/register.css"/>
+</head>
+<body>
+    <div id="login">
+        <h1>密码找回</h1>
+        <form method="POST">
+            <input type="text" name="username" placeholder="请输入用户名" ></input>
+            <input type="email" name="email" placeholder="请输入邮箱" ></input>
+            <input type="text" name="phone" placeholder="请输入您的手机号码"></input>
+            <button class="but" type="submit">找回密码</button>
+            <a style="color: white" href="/">返回</a>
+            <a style="color: white;font-size: x-small">{% if message %} {{message}} {% endif %}</a>
+        </form>
+    </div>
+</body>
+</html>

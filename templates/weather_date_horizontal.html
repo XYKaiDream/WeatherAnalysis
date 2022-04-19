@@ -1,0 +1,285 @@
+﻿{% extends "layout.html" %}
+
+{% block right %}
+    <script src="../static/js/jquery.min.js" type="text/javascript" charset='utf-8'></script>
+    <script src="https://cdn.bootcss.com/echarts/4.4.0-rc.1/echarts.js" charset='utf-8'></script>
+
+    <script type="text/javascript">
+        function draw_echarts(year1, year2, zhibiao) {
+            var start_year = parseInt(year1);
+            var end_year = parseInt(year2);
+
+            if (parseInt(year1) > parseInt(year2)) {
+                var start_year = parseInt(year2);
+                var end_year = parseInt(year1);
+            }
+            $.get('http://127.0.0.1:5000/analysis_weather_year1_year2/' + start_year + '/' + end_year, {},
+                function (data) {
+                    var dom = document.getElementById("main1");
+                    var myChart = echarts.init(dom);
+
+                    var option = {
+                        tooltip: {
+                            trigger: 'axis',
+                            position: function (pt) {
+                                return [pt[0], '10%'];
+                            }
+                        },
+                        title: {
+                            left: 'center',
+                            text: '北京' + start_year + ' - ' + end_year + '年最高气温与最低气温的的变化情况',
+                        },
+                        toolbox: {
+                            feature: {
+                                dataZoom: {
+                                    yAxisIndex: 'none'
+                                },
+                                restore: {},
+                                saveAsImage: {}
+                            }
+                        },
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: data['日期']
+                        },
+                        yAxis: {
+                            type: 'value',
+                            scale: true,
+                            min: 'dataMin'
+                        },
+                        dataZoom: [{
+                            type: 'inside',
+                            start: 0,
+                            end: 100
+                        }, {
+                            start: 0,
+                            end: 100,
+                            handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                            handleSize: '80%',
+                            handleStyle: {
+                                color: '#fff',
+                                shadowBlur: 3,
+                                shadowColor: 'rgba(0, 0, 0, 0.6)',
+                                shadowOffsetX: 2,
+                                shadowOffsetY: 2
+                            }
+                        }],
+                        series: [
+                            {
+                                name: '最高气温℃',
+                                type: 'line',
+                                smooth: true,
+                                symbol: 'none',
+                                itemStyle: {
+                                    color: 'rgb(255, 70, 131)'
+                                },
+                                areaStyle: {
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: 'rgb(255, 158, 68)'
+                                    }, {
+                                        offset: 1,
+                                        color: 'rgb(255, 70, 131)'
+                                    }])
+                                },
+                                data: data['最高气温']
+                            },
+                            {
+                                name: '最低气温℃',
+                                type: 'line',
+                                smooth: true,
+                                symbol: 'none',
+                                itemStyle: {
+                                    color: 'rgb(65,105,225)'
+                                },
+                                areaStyle: {
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: 'rgb(65,105,225)'
+                                    }, {
+                                        offset: 1,
+                                        color: 'rgb(135,206,250)'
+                                    }])
+                                },
+                                data: data['最低气温']
+                            }
+                        ]
+                    };
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+
+                    var dom = document.getElementById("main2");
+                    var myChart = echarts.init(dom);
+                    var series_data = [];
+                    for (var i = 0; i < data['天气状况'].length; i++) {
+                        series_data.push({value: data['天气状况_个数'][i], name: data['天气状况'][i]});
+                    }
+
+                    var option = {
+                        title: {
+                            left: 'center',
+                            text: '北京' + start_year + ' - ' + end_year + '年不同天气状况的占比情况',
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b} : {c} ({d}%)'
+                        },
+                        series: [
+                            {
+                                name: '天数',
+                                type: 'pie',
+                                radius: '65%',
+                                center: ['50%', '60%'],
+                                data: series_data,
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                }
+                            }
+                        ]
+                    };
+
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+
+                    // 基于准备好的dom，初始化echarts实例
+                    var dom = document.getElementById("main3");
+                    var myChart = echarts.init(dom);
+
+                    var option = {
+                        title: {
+                            left: 'center',
+                            text: '北京' + start_year + ' - ' + end_year + '年不同风力风向天数排序情况',
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'shadow'
+                            }
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            type: 'value',
+                            boundaryGap: [0, 0.01]
+                        },
+                        yAxis: {
+                            name: '风力风向',
+                            type: 'category',
+                            data: data['风力风向']
+                        },
+                        series: [
+                            {
+                                type: 'bar',
+                                itemStyle: {
+                                    color: '#19CAAD'
+                                },
+                                data: data['风力风向_个数']
+                            }
+                        ]
+                    };
+
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+
+                }
+            );
+
+        }
+
+        // 初始化界面
+        $(function () {
+            $('#li_1').attr('class', '');
+            $('#li_2').attr('class', 'active');
+            $('#li_3').attr('class', '');
+            $('#li_4').attr('class', '');
+
+            $.ajaxSetup({async: false});
+
+            // 获取所有城市
+            $.get('http://127.0.0.1:5000/get_all_cities_yearmonths', {},
+                function (data) {
+                    for (var i = 0; i < data['cities'].length; i++) {
+                        const li = '<option value="' + data['cities'][i] + '">' + data['cities'][i] + '</option>';
+                        $('#city').append(li);
+                    }
+
+                    for (var i = 0; i < data['years'].length; i++) {
+                        const li = '<option value="' + data['years'][i] + '">' + data['years'][i] + '</option>';
+                        $('#year').append(li);
+                    }
+                }
+            );
+
+            function change_callback() {
+                var start_year = $("#start_year").val();
+                var end_year = $("#end_year").val();
+                draw_echarts(start_year, end_year);
+            }
+
+            $('#start_year').on('change', change_callback);
+            $('#end_year').on('change', change_callback);
+
+            // 获取第一个有效时间的产量等数据
+            const start_year = $('#start_year option:first-child').val();
+            const end_year = $('#end_year option:first-child').val();
+            draw_echarts(start_year, end_year);
+        });
+    </script>
+
+    <!--右边展示-->
+    <div class="col-sm-10 col-sm-offset-2 main">
+        <h3 class="page-header">北京天气年度变化（横向分析）</h3>
+        <div class="row">
+            <div class="col-sm-10" style="margin-bottom: 20px; font-size: 18px;">
+                <span>选择开始年份：</span>
+                <select class="combobox" id="start_year"
+                        style="margin-left: 10px; margin-right: 20px; font-size: 18px; height: 28px;">
+                    <option value="2011">2011</option>
+                    <option value="2012">2012</option>
+                    <option value="2013">2013</option>
+                    <option value="2014">2014</option>
+                    <option value="2015">2015</option>
+                    <option value="2016">2016</option>
+                    <option value="2017">2017</option>
+                    <option value="2018">2018</option>
+                    <option value="2019">2019</option>
+                </select>
+                <span>选择结束年份：</span>
+                <select class="combobox" id="end_year"
+                        style="margin-left: 10px; margin-right: 20px; font-size: 18px; height: 28px;">
+                    <option value="2011">2011</option>
+                    <option value="2012">2012</option>
+                    <option value="2013">2013</option>
+                    <option value="2014">2014</option>
+                    <option value="2015">2015</option>
+                    <option value="2016">2016</option>
+                    <option value="2017">2017</option>
+                    <option value="2018">2018</option>
+                    <option value="2019">2019</option>
+                </select>
+            </div>
+        </div>
+        <div class="row placeholders">
+            <div class="col-xs-12 placeholder" style="height:500px;" id="main1">
+            </div>
+        </div>
+
+        <div class="row placeholders">
+            <div class="col-xs-6 placeholder" style="height:600px;" id="main2"></div>
+            <div class="col-xs-6 placeholder" style="height:600px;" id="main3"></div>
+        </div>
+
+    </div>
+{% endblock %}
